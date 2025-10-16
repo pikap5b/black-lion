@@ -10,6 +10,7 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const scrollToSection = (sectionId: string) => {
@@ -46,6 +47,24 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  // Track gallery scroll position for dots
+  useEffect(() => {
+    const handleGalleryScroll = () => {
+      if (galleryRef.current) {
+        const scrollAmount = 400; // Width of one image (384px) + gap (16px)
+        const currentScroll = galleryRef.current.scrollLeft;
+        const newIndex = Math.round(currentScroll / scrollAmount);
+        setCurrentGalleryIndex(newIndex);
+      }
+    };
+
+    const galleryElement = galleryRef.current;
+    if (galleryElement) {
+      galleryElement.addEventListener('scroll', handleGalleryScroll, { passive: true });
+      return () => galleryElement.removeEventListener('scroll', handleGalleryScroll);
+    }
+  }, []);
+
   const scrollGallery = (direction: 'left' | 'right') => {
     if (galleryRef.current) {
       const scrollAmount = 400; // Width of one image (384px) + gap (16px)
@@ -53,6 +72,18 @@ export default function Home() {
       const targetScroll = direction === 'left' 
         ? Math.max(0, currentScroll - scrollAmount)
         : currentScroll + scrollAmount;
+      
+      galleryRef.current.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToGalleryIndex = (index: number) => {
+    if (galleryRef.current) {
+      const scrollAmount = 400; // Width of one image (384px) + gap (16px)
+      const targetScroll = index * scrollAmount;
       
       galleryRef.current.scrollTo({
         left: targetScroll,
@@ -214,11 +245,9 @@ export default function Home() {
             />
             
             {/* Horizontal transparent/dark label with white text for readability */}
-              <div className="absolute left-8 top-1/2 -translate-y-1/2 max-w-xl">
-                <div className="text-white font-bold text-2xl md:text-4xl text-left drop-shadow-lg leading-tight">
-                  your trusted<br />
-                  partner in security<br />
-                  and innovations
+              <div className="absolute left-15 top-1/2 -translate-y-1/2 max-w-xl">
+                <div className="bg-white/40 p-4 rounded text-black font-bold text-2xl md:text-4xl text-left drop-shadow-lg leading-tight">
+                  Your Peace of Mind<br />Is Our Business.
                 </div>
               </div>
           </div>
@@ -327,6 +356,31 @@ export default function Home() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                   </div>
+                ))}
+              </div>
+
+              {/* Mobile Dots Indicator */}
+              <div className="md:hidden flex justify-center mt-6 space-x-2">
+                {[
+                  '/images/services/cctv.jpg',
+                  '/images/services/alarms.jpg',
+                  '/images/services/access-control.jpg',
+                  '/images/services/networking.jpg',
+                  '/images/services/solar.jpg',
+                  '/images/services/cctv.jpg',
+                  '/images/services/alarms.jpg',
+                  '/images/services/networking.jpg'
+                ].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => scrollToGalleryIndex(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentGalleryIndex
+                        ? 'bg-white scale-125'
+                        : 'bg-white/50 hover:bg-white/75'
+                    }`}
+                    aria-label={`Go to gallery image ${index + 1}`}
+                  />
                 ))}
               </div>
             </div>

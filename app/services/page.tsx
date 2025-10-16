@@ -10,6 +10,7 @@ export default function ServicesPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const scrollToSection = (sectionId: string) => {
@@ -46,6 +47,24 @@ export default function ServicesPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  // Track gallery scroll position for dots
+  useEffect(() => {
+    const handleGalleryScroll = () => {
+      if (galleryRef.current) {
+        const scrollAmount = 400; // Width of one image (384px) + gap (16px)
+        const currentScroll = galleryRef.current.scrollLeft;
+        const newIndex = Math.round(currentScroll / scrollAmount);
+        setCurrentGalleryIndex(newIndex);
+      }
+    };
+
+    const galleryElement = galleryRef.current;
+    if (galleryElement) {
+      galleryElement.addEventListener('scroll', handleGalleryScroll, { passive: true });
+      return () => galleryElement.removeEventListener('scroll', handleGalleryScroll);
+    }
+  }, []);
+
   const scrollGallery = (direction: 'left' | 'right') => {
     if (galleryRef.current) {
       const scrollAmount = 400; // Width of one image (384px) + gap (16px)
@@ -53,6 +72,18 @@ export default function ServicesPage() {
       const targetScroll = direction === 'left' 
         ? Math.max(0, currentScroll - scrollAmount)
         : currentScroll + scrollAmount;
+      
+      galleryRef.current.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToGalleryIndex = (index: number) => {
+    if (galleryRef.current) {
+      const scrollAmount = 400; // Width of one image (384px) + gap (16px)
+      const targetScroll = index * scrollAmount;
       
       galleryRef.current.scrollTo({
         left: targetScroll,
@@ -158,7 +189,7 @@ export default function ServicesPage() {
                 />
               </div>
               <div className="flex flex-col -translate-y-1">
-                <span className="text-xl font-bold text-[#090909]">ASM Black Lion</span>
+                <span className="text-xl font-bold text-[#090909]">AGM Black Lion</span>
                 <span className="text-sm text-[#090909]/70">Security Systems LTD</span>
               </div>
             </Link>
@@ -359,6 +390,31 @@ export default function ServicesPage() {
                   </div>
                 ))}
               </div>
+
+              {/* Mobile Dots Indicator */}
+              <div className="md:hidden flex justify-center mt-6 space-x-2">
+                {[
+                  '/images/services/cctv.jpg',
+                  '/images/services/alarms.jpg',
+                  '/images/services/access-control.jpg',
+                  '/images/services/networking.jpg',
+                  '/images/services/solar.jpg',
+                  '/images/services/cctv.jpg',
+                  '/images/services/alarms.jpg',
+                  '/images/services/networking.jpg'
+                ].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => scrollToGalleryIndex(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentGalleryIndex
+                        ? 'bg-white scale-125'
+                        : 'bg-white/50 hover:bg-white/75'
+                    }`}
+                    aria-label={`Go to gallery image ${index + 1}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -428,7 +484,7 @@ export default function ServicesPage() {
         <div className="container mx-auto px-4">
           <div className="text-center">
             <p className="text-[#f9f9fb]/70">
-              © 2023 ASM Black Lion Security Systems LTD. All rights reserved.
+              © 2023 AGM Black Lion Security Systems LTD. All rights reserved.
             </p>
             <button className="text-[#f9f9fb]/70 hover:text-[#f9f9fb] transition-colors mt-2">
               Privacy Policy
