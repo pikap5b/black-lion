@@ -243,13 +243,6 @@ export default function Home() {
               alt="Security Systems"
               className="w-full h-full object-cover"
             />
-            
-            {/* Horizontal transparent/dark label with white text for readability */}
-              <div className="absolute left-15 top-1/2 -translate-y-1/2 max-w-xl">
-                <div className="bg-white/40 p-4 rounded text-black font-bold text-2xl md:text-4xl text-left drop-shadow-lg leading-tight">
-                  Your Peace of Mind<br />Is Our Business.
-                </div>
-              </div>
           </div>
         </section>
 
